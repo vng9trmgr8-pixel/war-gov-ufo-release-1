@@ -210,6 +210,21 @@ select option { background: var(--night); }
 .source-line a:hover { border-color: var(--ice); }
 .source-line .sep { color: var(--rule); }
 .source-line .counts { color: var(--white); }
+.source-line a.download-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ice-dim);
+  padding: 6px 12px;
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  margin-left: var(--space-2);
+}
+.source-line a.download-all:hover {
+  background: var(--ice-glow);
+  border-color: var(--ice);
+}
+.source-line a.download-all svg { display: block; }
 
 /* hide stamps — war.gov design uses none */
 .stamps { display: none; }
