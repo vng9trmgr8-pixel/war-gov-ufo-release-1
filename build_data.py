@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).parent
-CSV_SRC = Path("/Users/jaredrice/Desktop/claude/Olaf/war.gov-ufo/uap-csv.csv")
+CSV_SRC = Path("/Users/jaredrice/Desktop/claude/Agent/war.gov-ufo/uap-csv.csv")
 POSTER_RE = re.compile(r'poster="([^"]+)"')
 
 

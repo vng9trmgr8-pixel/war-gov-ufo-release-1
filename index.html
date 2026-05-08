@@ -63,6 +63,10 @@
     <span class="tab-label">Images</span>
     <span class="tab-count" id="img-count">—</span>
   </button>
+  <button class="tab" role="tab" data-tab="videos" aria-selected="false">
+    <span class="tab-label">Videos</span>
+    <span class="tab-count" id="vid-count">—</span>
+  </button>
 
   <div class="tab-tools">
     <input id="search" type="search" placeholder="search title, agency, location, blurb…" autocomplete="off" />
@@ -81,6 +85,11 @@
   <section id="panel-images" class="panel" role="tabpanel" aria-labelledby="images" hidden>
     <div id="img-grid" class="img-grid"></div>
     <p id="img-empty" class="empty hidden">no records match.</p>
+  </section>
+
+  <section id="panel-videos" class="panel" role="tabpanel" aria-labelledby="videos" hidden>
+    <div id="vid-grid" class="vid-grid"></div>
+    <p id="vid-empty" class="empty hidden">no records match.</p>
   </section>
 </main>
 

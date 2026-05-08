@@ -109,9 +109,55 @@
     );
   };
 
+  const renderVideos = () => {
+    const grid = $("#vid-grid");
+    const empty = $("#vid-empty");
+    const list = filtered(DATA.videos);
+    grid.innerHTML = list
+      .map(
+        (r, i) => `
+        <article class="vid-card" data-i="${i}">
+          <button class="vid-thumb-wrap" type="button" aria-label="Play ${escapeHTML(r.title)}">
+            <img loading="lazy" src="${escapeHTML(r.thumb)}" alt="${escapeHTML(r.title)}" />
+            <span class="vid-play" aria-hidden="true">▶</span>
+          </button>
+          <div class="vid-body">
+            <div class="pdf-meta">
+              ${r.agency ? `<span class="pill agency">${escapeHTML(r.agency)}</span>` : ""}
+              ${r.incidentDate && r.incidentDate !== "N/A" ? `<span class="pill">${escapeHTML(r.incidentDate)}</span>` : ""}
+              ${r.incidentLocation && r.incidentLocation !== "N/A" ? `<span class="pill">${escapeHTML(r.incidentLocation)}</span>` : ""}
+            </div>
+            <h3 class="pdf-title">${escapeHTML(formatTitle(r.title))}</h3>
+            <p class="pdf-blurb">${escapeHTML(r.blurb || "—")}</p>
+            <div class="pdf-actions">
+              <a href="${escapeHTML(r.dvidsPage)}" target="_blank" rel="noopener">OPEN ON DVIDS →</a>
+              ${r.blurb && r.blurb.length > 240 ? `<button class="more" type="button" data-toggle>READ MORE</button>` : ""}
+            </div>
+          </div>
+        </article>`
+      )
+      .join("");
+    empty.classList.toggle("hidden", list.length > 0);
+
+    grid.querySelectorAll("[data-toggle]").forEach((btn) =>
+      btn.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest(".vid-card");
+        const expanded = card.classList.toggle("expanded");
+        btn.textContent = expanded ? "COLLAPSE" : "READ MORE";
+      })
+    );
+    grid.querySelectorAll(".vid-thumb-wrap").forEach((el) =>
+      el.addEventListener("click", () => {
+        const i = Number(el.closest(".vid-card").dataset.i);
+        openLightbox(list, i, "video");
+      })
+    );
+  };
+
   const renderActive = () => {
     if (activeTab === "pdfs") renderPdfs();
     else if (activeTab === "images") renderImages();
+    else if (activeTab === "videos") renderVideos();
   };
 
   /* ======================= tabs / filters ======================= */
@@ -132,7 +178,10 @@
   };
 
   const rebuildAgencyFilter = () => {
-    const list = activeTab === "pdfs" ? DATA.pdfs : DATA.images;
+    const list =
+      activeTab === "pdfs" ? DATA.pdfs :
+      activeTab === "images" ? DATA.images :
+      DATA.videos;
     const agencies = Array.from(new Set(list.map((r) => r.agency).filter(Boolean))).sort();
     const sel = $("#agency-filter");
     const current = sel.value;
@@ -160,7 +209,13 @@
     const r = lbItems[lbIndex];
     if (!r) return;
     const media = $("#lb-media");
-    media.innerHTML = `<img src="${escapeHTML(r.url || r.thumb)}" alt="${escapeHTML(r.title)}" />`;
+    if (r._mode === "video") {
+      media.innerHTML =
+        `<iframe src="${escapeHTML(r.embed)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
+    } else {
+      media.innerHTML =
+        `<img src="${escapeHTML(r.url || r.thumb)}" alt="${escapeHTML(r.title)}" />`;
+    }
     $("#lb-title").textContent = formatTitle(r.title);
     const meta = [];
     if (r.agency) meta.push(`<span class="pill agency">${escapeHTML(r.agency)}</span>`);
@@ -170,8 +225,13 @@
     $("#lb-meta").innerHTML = meta.join("");
     $("#lb-blurb").textContent = r.blurb || "";
     const orig = $("#lb-original");
-    orig.href = r.url;
-    orig.textContent = "OPEN ORIGINAL ON WAR.GOV →";
+    if (r._mode === "video") {
+      orig.href = r.dvidsPage;
+      orig.textContent = "OPEN ON DVIDS →";
+    } else {
+      orig.href = r.url;
+      orig.textContent = "OPEN ORIGINAL ON WAR.GOV →";
+    }
   };
   const lbStep = (delta) => {
     lbIndex = (lbIndex + delta + lbItems.length) % lbItems.length;
@@ -208,8 +268,9 @@
   const paintCounts = () => {
     $("#pdf-count").textContent = DATA.pdfs.length;
     $("#img-count").textContent = DATA.images.length;
+    $("#vid-count").textContent = DATA.videos.length;
     $("#counts").textContent =
-      `${DATA.pdfs.length} PDFs · ${DATA.images.length} IMAGES`;
+      `${DATA.pdfs.length} PDFs · ${DATA.images.length} IMAGES · ${DATA.videos.length} VIDEOS`;
   };
 
   fetch("data.json")
