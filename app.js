@@ -250,6 +250,17 @@
       orig.href = r.url;
       orig.textContent = "OPEN ORIGINAL ON WAR.GOV →";
     }
+
+    const pageUrl  = window.location.origin + window.location.pathname;
+    const titleTxt = formatTitle(r.title);
+    const shareTxt = `${titleTxt} — UFO Release 01 (war.gov)`;
+    const enc = encodeURIComponent;
+    $("#lb-share-x").href =
+      `https://twitter.com/intent/tweet?text=${enc(shareTxt)}&url=${enc(pageUrl)}`;
+    $("#lb-share-reddit").href =
+      `https://www.reddit.com/submit?url=${enc(pageUrl)}&title=${enc(shareTxt)}`;
+    $("#lb-share-mail").href =
+      `mailto:?subject=${enc(shareTxt)}&body=${enc(shareTxt + "\n\n" + pageUrl + "\n\nOriginal: " + (r.dvidsPage || r.url || ""))}`;
   };
   const lbStep = (delta) => {
     lbIndex = (lbIndex + delta + lbItems.length) % lbItems.length;
@@ -272,6 +283,22 @@
     $(".lb-close").addEventListener("click", closeLightbox);
     $(".lb-prev").addEventListener("click", () => lbStep(-1));
     $(".lb-next").addEventListener("click", () => lbStep(1));
+    $("#lb-share-copy").addEventListener("click", async () => {
+      const btn = $("#lb-share-copy");
+      const label = btn.querySelector(".lb-share-txt");
+      const original = label.textContent;
+      try {
+        await navigator.clipboard.writeText(window.location.origin + window.location.pathname);
+        label.textContent = "COPIED";
+      } catch {
+        label.textContent = "FAILED";
+      }
+      btn.classList.add("ok");
+      setTimeout(() => {
+        label.textContent = original;
+        btn.classList.remove("ok");
+      }, 1400);
+    });
     $("#lightbox").addEventListener("click", (e) => {
       if (e.target.id === "lightbox") closeLightbox();
     });
