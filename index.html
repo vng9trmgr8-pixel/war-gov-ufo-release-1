@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UFO — Release 01 // U.S. Department of War</title>
+<meta name="description" content="A reorganized, browsable mirror of the U.S. Department of War's UAP/UFO Release 01 archive — 119 declassified PDFs and 14 photos with summaries, sources linked." />
+<meta property="og:title" content="UFO — Release 01" />
+<meta property="og:description" content="Declassified UAP files, U.S. Department of War, May 8 2026." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="classification-strip top">
+  <span>TOP SECRET // SI / TK / NOFORN</span>
+  <span class="muted">— STRUCK / DOWNGRADED —</span>
+  <span class="redacted">UNCLASSIFIED // FOR PUBLIC RELEASE</span>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-meta">
+      <span class="tag">DOCUMENT REF</span>
+      <span class="value">DOW-UAP-REL-01</span>
+      <span class="tag">RELEASED</span>
+      <span class="value">2026 / 05 / 08</span>
+      <span class="tag">AUTHORITY</span>
+      <span class="value">SECWAR · ODNI · AARO</span>
+    </div>
+
+    <h1 class="brand">
+      <span class="brand-line-1">U.S. DEPARTMENT OF WAR</span>
+      <span class="brand-line-2">UFO &nbsp;/&nbsp; RELEASE&nbsp;01</span>
+    </h1>
+
+    <p class="lede">
+      Presidential Unsealing and Reporting System for UAP Encounters &mdash;
+      first tranche of declassified records concerning unidentified anomalous
+      phenomena, released to the public on order of the President.
+      <span class="dim">Files mirrored, indexed, and summarized; originals served from war.gov.</span>
+    </p>
+
+    <div class="source-line">
+      SOURCE &rarr;
+      <a href="https://www.war.gov/ufo/" target="_blank" rel="noopener">war.gov/ufo</a>
+      <span class="sep">//</span>
+      <span id="counts" class="counts">— loading manifest —</span>
+    </div>
+
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Archive sections">
+  <button class="tab active" role="tab" data-tab="pdfs" aria-selected="true">
+    <span class="tab-label">PDFs</span>
+    <span class="tab-count" id="pdf-count">—</span>
+  </button>
+  <button class="tab" role="tab" data-tab="images" aria-selected="false">
+    <span class="tab-label">Images</span>
+    <span class="tab-count" id="img-count">—</span>
+  </button>
+
+  <div class="tab-tools">
+    <input id="search" type="search" placeholder="search title, agency, location, blurb…" autocomplete="off" />
+    <select id="agency-filter" aria-label="Filter by agency">
+      <option value="">all agencies</option>
+    </select>
+  </div>
+</nav>
+
+<main>
+  <section id="panel-pdfs" class="panel active" role="tabpanel" aria-labelledby="pdfs">
+    <div id="pdf-grid" class="pdf-grid"></div>
+    <p id="pdf-empty" class="empty hidden">no records match.</p>
+  </section>
+
+  <section id="panel-images" class="panel" role="tabpanel" aria-labelledby="images" hidden>
+    <div id="img-grid" class="img-grid"></div>
+    <p id="img-empty" class="empty hidden">no records match.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-row">
+    <span>MIRROR OF&nbsp; <a href="https://www.war.gov/ufo/" target="_blank" rel="noopener">war.gov/ufo</a></span>
+    <span class="dot">·</span>
+    <span>U.S. DEPARTMENT OF WAR &mdash; PURSUE</span>
+    <span class="dot">·</span>
+    <span>RELEASE&nbsp;01 &mdash; MAY&nbsp;8&nbsp;2026</span>
+  </div>
+  <div class="footer-row dim">
+    Public-domain U.S. government records. PDFs and images are streamed from war.gov;
+    nothing on this page is rehosted.
+  </div>
+</footer>
+
+<!-- Lightbox overlay -->
+<div id="lightbox" class="lightbox" hidden>
+  <button class="lb-close" aria-label="Close">&times;</button>
+  <button class="lb-prev" aria-label="Previous">&larr;</button>
+  <button class="lb-next" aria-label="Next">&rarr;</button>
+  <figure>
+    <div class="lb-media" id="lb-media"></div>
+    <figcaption>
+      <div class="lb-title" id="lb-title"></div>
+      <div class="lb-meta" id="lb-meta"></div>
+      <div class="lb-blurb" id="lb-blurb"></div>
+      <div class="lb-actions">
+        <a id="lb-original" target="_blank" rel="noopener">OPEN ORIGINAL &rarr;</a>
+      </div>
+    </figcaption>
+  </figure>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
