@@ -391,7 +391,8 @@ main {
   overflow: hidden;
 }
 .pdf-card.expanded .pdf-blurb,
-.vid-card.expanded .pdf-blurb { -webkit-line-clamp: unset; }
+.vid-card.expanded .pdf-blurb,
+.img-card.expanded .pdf-blurb { -webkit-line-clamp: unset; }
 .pdf-actions {
   margin-top: auto;
   display: flex;
@@ -426,20 +427,38 @@ main {
 /* image gallery */
 .img-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
 }
 .img-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--rule);
-  background: var(--night-3);
-  cursor: zoom-in;
+  background: var(--panel);
   position: relative;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-  transition: border-color 160ms ease;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
-.img-card:hover { border-color: var(--ice); }
-.img-card img {
+.img-card:hover {
+  border-color: rgba(133, 188, 255, 0.52);
+  background: var(--ice-glow);
+  transform: translateY(-2px);
+}
+.img-thumb-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--night-3);
+  overflow: hidden;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  cursor: zoom-in;
+  display: block;
+  letter-spacing: 0;
+}
+.img-thumb-wrap:hover { background: var(--night-3); }
+.img-thumb-wrap img {
   display: block;
   width: 100%;
   height: 100%;
@@ -447,19 +466,13 @@ main {
   filter: grayscale(0.15) brightness(0.92);
   transition: transform 320ms ease, filter 320ms ease;
 }
-.img-card:hover img { transform: scale(1.04); filter: none; }
-.img-card .img-tag {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: linear-gradient(180deg, transparent, rgba(2,7,13,0.92));
-  color: var(--white);
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 24px 12px 10px;
+.img-card:hover .img-thumb-wrap img { transform: scale(1.04); filter: none; }
+.img-body {
+  padding: var(--space-4);
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
 }
 
 /* video gallery */

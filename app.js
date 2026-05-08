@@ -90,20 +90,38 @@
     grid.innerHTML = list
       .map(
         (r, i) => `
-        <button class="img-card" data-i="${i}" type="button" aria-label="View ${escapeHTML(r.title)}">
-          <img loading="lazy" src="${escapeHTML(r.thumb || r.url)}" alt="${escapeHTML(r.title)}" />
-          <span class="img-tag">
-            <span>${escapeHTML(r.agency || "—")}</span>
-            <span>${escapeHTML(r.incidentDate && r.incidentDate !== "N/A" ? r.incidentDate : "")}</span>
-          </span>
-        </button>`
+        <article class="img-card" data-i="${i}">
+          <button class="img-thumb-wrap" type="button" aria-label="Enlarge ${escapeHTML(r.title)}">
+            <img loading="lazy" src="${escapeHTML(r.thumb || r.url)}" alt="${escapeHTML(r.title)}" />
+          </button>
+          <div class="img-body">
+            <div class="pdf-meta">
+              ${r.agency ? `<span class="pill agency">${escapeHTML(r.agency)}</span>` : ""}
+              ${r.incidentDate && r.incidentDate !== "N/A" ? `<span class="pill">${escapeHTML(r.incidentDate)}</span>` : ""}
+              ${r.incidentLocation && r.incidentLocation !== "N/A" ? `<span class="pill">${escapeHTML(r.incidentLocation)}</span>` : ""}
+            </div>
+            <h3 class="pdf-title">${escapeHTML(formatTitle(r.title))}</h3>
+            <p class="pdf-blurb">${escapeHTML(r.blurb || "—")}</p>
+            <div class="pdf-actions">
+              <a href="${escapeHTML(r.url)}" target="_blank" rel="noopener">OPEN ORIGINAL →</a>
+              ${r.blurb && r.blurb.length > 240 ? `<button class="more" type="button" data-toggle>READ MORE</button>` : ""}
+            </div>
+          </div>
+        </article>`
       )
       .join("");
     empty.classList.toggle("hidden", list.length > 0);
 
-    grid.querySelectorAll(".img-card").forEach((el) =>
+    grid.querySelectorAll("[data-toggle]").forEach((btn) =>
+      btn.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest(".img-card");
+        const expanded = card.classList.toggle("expanded");
+        btn.textContent = expanded ? "COLLAPSE" : "READ MORE";
+      })
+    );
+    grid.querySelectorAll(".img-thumb-wrap").forEach((el) =>
       el.addEventListener("click", () => {
-        const i = Number(el.dataset.i);
+        const i = Number(el.closest(".img-card").dataset.i);
         openLightbox(list, i, "image");
       })
     );
