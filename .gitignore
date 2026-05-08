@@ -4,3 +4,4 @@ node_modules
 __pycache__
 extract_text.out
 extracted-text/
+summaries/
