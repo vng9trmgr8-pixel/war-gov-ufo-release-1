@@ -124,15 +124,34 @@ select option { background: var(--night); }
   padding: var(--space-9) var(--gutter) var(--space-8);
   border-bottom: 1px solid var(--rule);
   overflow: hidden;
+  /* Layered background: dark vignette + dim ice glow + horizontal scanlines
+     + analog static noise (SVG fractalNoise filter). Stacking order top → bottom. */
+  background-color: var(--night);
+  background-image:
+    radial-gradient(ellipse at center, transparent 25%, var(--night) 95%),
+    linear-gradient(180deg, rgba(2,7,13,0.55) 0%, rgba(2,7,13,0.78) 65%, var(--night) 100%),
+    radial-gradient(circle at 80% 20%, var(--ice-glow), transparent 55%),
+    radial-gradient(circle at 12% 90%, rgba(133,188,255,0.05), transparent 60%),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 2px,
+      rgba(0,0,0,0.25) 3px,
+      rgba(0,0,0,0.25) 4px
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0.299 0.587 0.114 0 0  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+  background-size: cover, cover, cover, cover, auto, 240px 240px;
 }
 .masthead::before {
+  /* Subtle CRT edge vignette and scanline flicker */
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 80% 20%, var(--ice-glow), transparent 55%),
-    radial-gradient(circle at 12% 90%, rgba(133,188,255,0.05), transparent 60%);
   pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(2,7,13,0.55) 0%, transparent 8%, transparent 92%, rgba(2,7,13,0.55) 100%);
+  mix-blend-mode: multiply;
 }
 .masthead-inner {
   position: relative;
