@@ -20,7 +20,18 @@ const BROWSER_HEADERS = {
     "text/html,application/xhtml+xml,application/xml;q=0.9," +
     "image/avif,image/webp,application/pdf,*/*;q=0.8",
   "accept-language": "en-US,en;q=0.9",
+  "accept-encoding": "gzip, deflate, br",
+  "cache-control": "no-cache",
+  pragma: "no-cache",
   referer: "https://www.war.gov/ufo/",
+  "sec-ch-ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": '"macOS"',
+  "sec-fetch-dest": "document",
+  "sec-fetch-mode": "navigate",
+  "sec-fetch-site": "same-origin",
+  "sec-fetch-user": "?1",
+  "upgrade-insecure-requests": "1",
 };
 
 module.exports = async function handler(req, res) {
