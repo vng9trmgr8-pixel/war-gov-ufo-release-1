@@ -338,17 +338,17 @@ select option { background: var(--night); }
 @media (max-width: 980px) {
   .tabs { padding: 0; flex-wrap: nowrap; }
   .tab {
-    padding: 12px 8px;
+    padding: 14px 10px;
     flex: 1 1 0;
     min-width: 0;
     justify-content: center;
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    gap: 8px;
   }
   .tab-count {
-    font-size: 9px;
-    padding: 2px 5px;
+    font-size: 10px;
+    padding: 2px 6px;
     min-width: 22px;
     letter-spacing: 0;
   }
@@ -358,12 +358,14 @@ select option { background: var(--night); }
     border-top: 1px solid var(--rule);
     flex-wrap: wrap;
   }
-  .tab-tools input { flex: 1 1 100%; min-width: 0; }
+  .tab-tools input  { flex: 1 1 100%; min-width: 0; }
   .tab-tools select { flex: 1 1 100%; }
 }
-@media (max-width: 420px) {
-  .tab { padding: 10px 4px; font-size: 9px; letter-spacing: 0.08em; gap: 4px; }
-  .tab-count { font-size: 8px; padding: 1px 4px; min-width: 18px; }
+@media (max-width: 520px) {
+  /* On phones, the count chips eat all the room. Drop them and let the
+     labels breathe. */
+  .tab .tab-count { display: none; }
+  .tab { padding: 14px 6px; font-size: 12px; letter-spacing: 0.16em; gap: 0; }
 }
 
 /* ============================================================
