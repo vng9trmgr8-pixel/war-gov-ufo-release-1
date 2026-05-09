@@ -411,6 +411,23 @@
   // Pick a random DVIDS video on each page load and use it as the masthead bg.
   // The MP4 URL is derived from the poster URL — DVIDS encodes the same
   // DOD_<id> in both the thumb and the source clip.
+  // PR23 (Iraq Dec 2022 IR clip) is weighted 30% above the rest.
+  const FEATURED_VIDEO_ID = "1006062";
+  const FEATURED_WEIGHT   = 1.3;
+
+  const weightedPick = (items) => {
+    const weights = items.map((v) =>
+      v.videoId === FEATURED_VIDEO_ID ? FEATURED_WEIGHT : 1.0
+    );
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < items.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return items[i];
+    }
+    return items[items.length - 1];
+  };
+
   const setRandomBgVideo = () => {
     const el = $("#masthead-bg");
     if (!el || !DATA || !DATA.videos) return;
@@ -423,7 +440,7 @@
     if (!candidates.length) return;
     const tryOne = (attempt) => {
       if (attempt >= 5) return;
-      const v = candidates[Math.floor(Math.random() * candidates.length)];
+      const v = weightedPick(candidates);
       const m = v.thumb.match(/\/(DOD_\d+)\.\d+\//);
       if (!m) return tryOne(attempt + 1);
       const dodId = m[1];
