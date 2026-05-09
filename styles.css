@@ -124,44 +124,55 @@ select option { background: var(--night); }
   padding: var(--space-9) var(--gutter) var(--space-8);
   border-bottom: 1px solid var(--rule);
   overflow: hidden;
-  background: #0a0a0a;
+  background: #050608;
 }
-/* Dense, fine-grain TV static — single still frame (no animation).
-   feTurbulence with high baseFrequency (small grain), grayscale midtones
-   rather than thresholded white, ~full coverage. */
+/* Anisotropic analog static: high X frequency + low Y frequency produces the
+   horizontal smear / scanline-aligned streaks of real CRT static. Slight blue
+   phosphor tint, darkened down so it sits behind the masthead text. */
 .masthead::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='2.2' numOctaves='3' stitchTiles='stitch' seed='7'/><feColorMatrix values='0.34 0.34 0.34 0 0   0.34 0.34 0.34 0 0   0.34 0.34 0.34 0 0   0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.55' intercept='-0.18'/><feFuncG type='linear' slope='1.55' intercept='-0.18'/><feFuncB type='linear' slope='1.55' intercept='-0.18'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23s)'/></svg>");
-  background-size: 420px 420px;
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='2.6 0.55' numOctaves='3' stitchTiles='stitch' seed='9'/><feColorMatrix values='0.62 0.62 0.62 0 0   0.66 0.66 0.66 0 0   0.74 0.74 0.74 0 0   0 0 0 0 1'/><feComponentTransfer><feFuncR type='linear' slope='1.9' intercept='-0.45'/><feFuncG type='linear' slope='1.9' intercept='-0.45'/><feFuncB type='linear' slope='1.9' intercept='-0.42'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23s)'/></svg>");
+  background-size: 480px 480px;
   background-repeat: repeat;
-  opacity: 1;
+  opacity: 0.55;
 }
-/* Layer 2: scanlines + faint ice glow + dark blend-out at the bottom */
+/* Top layer: prominent CRT scanlines + slow horizontal hum bands (broad waves
+   of brightness across the image like the reference) + dark blend-out so it
+   merges with the page background. */
 .masthead::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    /* fade into the page */
-    linear-gradient(180deg, transparent 35%, rgba(2,7,13,0.65) 75%, var(--night) 100%),
-    /* edge vignette */
-    radial-gradient(ellipse at center, transparent 35%, rgba(2,7,13,0.55) 95%),
-    /* keep the original ice-blue glow */
-    radial-gradient(circle at 80% 20%, rgba(133,188,255,0.16), transparent 55%),
-    radial-gradient(circle at 12% 90%, rgba(133,188,255,0.08), transparent 60%),
-    /* CRT scanlines */
+    /* Strong scanlines — every other line darker, classic CRT */
     repeating-linear-gradient(
       180deg,
-      transparent 0,
-      transparent 2px,
-      rgba(0,0,0,0.45) 3px,
-      rgba(0,0,0,0.45) 4px
-    );
+      rgba(0,0,0,0)    0,
+      rgba(0,0,0,0)    1px,
+      rgba(0,0,0,0.55) 2px,
+      rgba(0,0,0,0.55) 3px
+    ),
+    /* Slow horizontal hum bars — broad bright/dark zones */
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.05) 0%,
+      rgba(0,0,0,0.30) 22%,
+      rgba(0,0,0,0.10) 38%,
+      rgba(0,0,0,0.42) 60%,
+      rgba(0,0,0,0.18) 78%,
+      rgba(0,0,0,0.45) 100%
+    ),
+    /* Faint ice-blue phosphor tint */
+    radial-gradient(circle at 80% 20%, rgba(133,188,255,0.10), transparent 55%),
+    /* Edge vignette */
+    radial-gradient(ellipse at center, transparent 30%, rgba(2,7,13,0.65) 95%),
+    /* Bottom fade into the rest of the page */
+    linear-gradient(180deg, transparent 35%, rgba(5,6,8,0.75) 80%, var(--night) 100%);
 }
 .masthead-inner {
   position: relative;
