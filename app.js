@@ -407,6 +407,38 @@
     downloadInProgress = false;
   };
 
+  /* ======================= masthead background video ======================= */
+  // Pick a random DVIDS video on each page load and use it as the masthead bg.
+  // The MP4 URL is derived from the poster URL — DVIDS encodes the same
+  // DOD_<id> in both the thumb and the source clip.
+  const setRandomBgVideo = () => {
+    const el = $("#masthead-bg");
+    if (!el || !DATA || !DATA.videos) return;
+    // Skip audio-only entries (NASA Apollo audio excerpts)
+    const candidates = DATA.videos.filter((v) => {
+      if (!v.thumb) return false;
+      if (/audio/i.test(v.title || "")) return false;
+      return /\/DOD_\d+\.\d+\//.test(v.thumb);
+    });
+    if (!candidates.length) return;
+    const tryOne = (attempt) => {
+      if (attempt >= 5) return;
+      const v = candidates[Math.floor(Math.random() * candidates.length)];
+      const m = v.thumb.match(/\/(DOD_\d+)\.\d+\//);
+      if (!m) return tryOne(attempt + 1);
+      const dodId = m[1];
+      const mp4 = `https://d34w7g4gy10iej.cloudfront.net/video/2605/${dodId}/${dodId}.mp4`;
+      el.poster = v.thumb;
+      el.src = mp4;
+      el.dataset.title = v.title || "";
+      el.onerror = () => tryOne(attempt + 1);
+      el.load();
+      const playPromise = el.play();
+      if (playPromise && playPromise.catch) playPromise.catch(() => {});
+    };
+    tryOne(0);
+  };
+
   /* ======================= boot ======================= */
   const wireEvents = () => {
     $$(".tab").forEach((t) =>
@@ -473,6 +505,7 @@
       rebuildAgencyFilter();
       wireEvents();
       renderActive();
+      setRandomBgVideo();
       // Search index is fetched separately (≈1.3 MB) so the page renders fast.
       const searchInput = $("#search");
       const placeholder = searchInput.placeholder;
