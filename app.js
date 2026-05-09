@@ -8,6 +8,7 @@
   let SEARCH_HITS = null;            // Set<int> of pdf-indices matching current query (full-text)
   let activeTab = "pdfs";
   let activeAgency = "";
+  let activeSort = "default";
   let query = "";
   let lbItems = [];
   let lbIndex = 0;
@@ -56,12 +57,59 @@
     SEARCH_HITS = hits;
   };
 
-  const filtered = (list, listKind) =>
-    list.filter(
+  // Best-effort date parser for free-text incident dates (e.g. "10/30/01",
+  // "Oct 30 2001", "5/8/26", "N/A"). Returns ms since epoch, or NaN if unparseable.
+  const parseDate = (s) => {
+    if (!s) return NaN;
+    const t = String(s).trim();
+    if (!t || /^n\/?a$/i.test(t) || /^—$/.test(t)) return NaN;
+    // mm/dd/yy or mm/dd/yyyy
+    const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+    if (m) {
+      let [_, mm, dd, yy] = m;
+      yy = yy.length === 2 ? (Number(yy) > 50 ? "19" + yy : "20" + yy) : yy;
+      const d = new Date(`${yy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`);
+      if (!isNaN(d)) return d.getTime();
+    }
+    const d = new Date(t);
+    return isNaN(d) ? NaN : d.getTime();
+  };
+
+  const cmpStr = (a, b) =>
+    String(a || "").localeCompare(String(b || ""), undefined, { sensitivity: "base" });
+
+  const sorters = {
+    "default":      null,
+    "title-asc":    (a, b) => cmpStr(a.title, b.title),
+    "title-desc":   (a, b) => cmpStr(b.title, a.title),
+    "agency-asc":   (a, b) => cmpStr(a.agency, b.agency) || cmpStr(a.title, b.title),
+    "location-asc": (a, b) => cmpStr(a.incidentLocation, b.incidentLocation) || cmpStr(a.title, b.title),
+    "date-desc": (a, b) => {
+      const da = parseDate(a.incidentDate), db = parseDate(b.incidentDate);
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return db - da;
+    },
+    "date-asc": (a, b) => {
+      const da = parseDate(a.incidentDate), db = parseDate(b.incidentDate);
+      if (isNaN(da) && isNaN(db)) return 0;
+      if (isNaN(da)) return 1;
+      if (isNaN(db)) return -1;
+      return da - db;
+    },
+  };
+
+  const filtered = (list, listKind) => {
+    const out = list.filter(
       (r) =>
         (!activeAgency || r.agency === activeAgency) &&
         matchQuery(r, query, listKind)
     );
+    const fn = sorters[activeSort];
+    if (fn) out.sort(fn);
+    return out;
+  };
 
   /* ======================= renderers ======================= */
   const renderPdfs = () => {
@@ -371,6 +419,10 @@
     });
     $("#agency-filter").addEventListener("change", (e) => {
       activeAgency = e.target.value;
+      renderActive();
+    });
+    $("#sort").addEventListener("change", (e) => {
+      activeSort = e.target.value;
       renderActive();
     });
     $(".lb-close").addEventListener("click", closeLightbox);

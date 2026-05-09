@@ -80,6 +80,15 @@
   </button>
 
   <div class="tab-tools">
+    <select id="sort" aria-label="Sort">
+      <option value="default">sort: default</option>
+      <option value="title-asc">sort: title A→Z</option>
+      <option value="title-desc">sort: title Z→A</option>
+      <option value="agency-asc">sort: agency A→Z</option>
+      <option value="date-desc">sort: incident date (newest)</option>
+      <option value="date-asc">sort: incident date (oldest)</option>
+      <option value="location-asc">sort: location A→Z</option>
+    </select>
     <input id="search" type="search" placeholder="search title, agency, location, blurb…" autocomplete="off" />
     <select id="agency-filter" aria-label="Filter by agency">
       <option value="">all agencies</option>
