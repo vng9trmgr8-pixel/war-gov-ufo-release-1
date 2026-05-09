@@ -1,49 +1,48 @@
 /**
- * Vercel Edge Function — proxies a single asset download from war.gov.
+ * Vercel Serverless Function (Node.js) — proxies a single asset download
+ * from war.gov so the browser can save it via Content-Disposition.
  *
- * Used by the DOWNLOAD ALL button. The browser cannot fetch war.gov directly
- * (CORS-blocked), and cross-origin <a download> doesn't trigger a download
- * (browser navigates to the resource instead). Streaming the response through
- * this same-origin proxy lets us set Content-Disposition: attachment so the
- * browser saves the file to the user's Downloads folder.
+ * Cross-origin <a download> doesn't trigger a real download (browsers
+ * navigate instead) and fetch() to war.gov is CORS-blocked, which is why
+ * the proxy is necessary.
+ *
+ * Note: Vercel's Edge Runtime fetch is blocked by war.gov's Akamai (TLS or
+ * IP heuristics). Node serverless fetch works.
  */
-export const config = { runtime: "edge" };
-
-const ALLOWED_HOSTS = new Set([
-  "www.war.gov",
-  "war.gov",
-]);
+const ALLOWED_HOSTS = new Set(["www.war.gov", "war.gov"]);
 
 const BROWSER_HEADERS = {
-  "User-Agent":
+  "user-agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
     "AppleWebKit/537.36 (KHTML, like Gecko) " +
     "Chrome/131.0.0.0 Safari/537.36",
-  "Accept":
+  accept:
     "text/html,application/xhtml+xml,application/xml;q=0.9," +
     "image/avif,image/webp,application/pdf,*/*;q=0.8",
-  "Accept-Language": "en-US,en;q=0.9",
-  "Referer": "https://www.war.gov/ufo/",
+  "accept-language": "en-US,en;q=0.9",
+  referer: "https://www.war.gov/ufo/",
 };
 
-export default async function handler(req) {
-  const reqUrl = new URL(req.url);
-  const target = reqUrl.searchParams.get("url");
-  const nameParam = reqUrl.searchParams.get("name");
+module.exports = async function handler(req, res) {
+  const target = (req.query && req.query.url) || "";
+  const nameParam = (req.query && req.query.name) || "";
 
   if (!target) {
-    return new Response("missing ?url", { status: 400 });
+    res.status(400).send("missing ?url");
+    return;
   }
 
   let parsed;
   try {
     parsed = new URL(target);
   } catch {
-    return new Response("invalid url", { status: 400 });
+    res.status(400).send("invalid url");
+    return;
   }
 
   if (parsed.protocol !== "https:" || !ALLOWED_HOSTS.has(parsed.hostname)) {
-    return new Response("only war.gov urls allowed", { status: 403 });
+    res.status(403).send("only war.gov urls allowed");
+    return;
   }
 
   let upstream;
@@ -53,33 +52,39 @@ export default async function handler(req) {
       redirect: "follow",
     });
   } catch (err) {
-    return new Response("upstream fetch failed: " + (err && err.message), {
-      status: 502,
-    });
+    res.status(502).send("upstream fetch failed: " + (err && err.message));
+    return;
   }
 
   if (!upstream.ok) {
-    return new Response(
-      "upstream " + upstream.status + " " + upstream.statusText,
-      { status: upstream.status },
-    );
+    res
+      .status(upstream.status)
+      .send("upstream " + upstream.status + " " + upstream.statusText);
+    return;
   }
 
   const filename = (nameParam || parsed.pathname.split("/").pop() || "file")
     .replace(/[\r\n"\\]/g, "")
     .slice(0, 200);
 
-  const headers = new Headers();
   const ct = upstream.headers.get("content-type") || "application/octet-stream";
-  headers.set("Content-Type", ct);
-  headers.set(
-    "Content-Disposition",
-    `attachment; filename="${filename}"`,
-  );
+  res.setHeader("Content-Type", ct);
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   const cl = upstream.headers.get("content-length");
-  if (cl) headers.set("Content-Length", cl);
-  headers.set("Cache-Control", "public, max-age=86400");
-  headers.set("X-Proxied-From", parsed.hostname);
+  if (cl) res.setHeader("Content-Length", cl);
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.setHeader("X-Proxied-From", parsed.hostname);
 
-  return new Response(upstream.body, { status: 200, headers });
-}
+  // Stream the body to the response
+  const reader = upstream.body.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!res.write(Buffer.from(value))) {
+      await new Promise((r) => res.once("drain", r));
+    }
+  }
+  res.end();
+};
+
+module.exports.config = { maxDuration: 300 };
