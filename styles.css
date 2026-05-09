@@ -210,21 +210,48 @@ select option { background: var(--night); }
 .source-line a:hover { border-color: var(--ice); }
 .source-line .sep { color: var(--rule); }
 .source-line .counts { color: var(--white); }
-.source-line a.download-all {
+.source-line .download-all {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: transparent;
+  color: var(--ice);
   border: 1px solid var(--ice-dim);
   padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
   letter-spacing: 0.22em;
   font-weight: 500;
   margin-left: var(--space-2);
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
 }
-.source-line a.download-all:hover {
+.source-line .download-all:hover {
   background: var(--ice-glow);
   border-color: var(--ice);
 }
-.source-line a.download-all svg { display: block; }
+.source-line .download-all svg { display: block; }
+.source-line .download-all .dl-progress {
+  font-size: 10px;
+  opacity: 0.85;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+.source-line .download-all.running {
+  background: var(--ice-glow);
+  border-color: var(--ice);
+  cursor: progress;
+}
+.source-line a.download-bundle {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: var(--muted-2);
+  border-bottom: 1px solid var(--rule);
+  margin-left: 4px;
+  padding-bottom: 1px;
+}
+.source-line a.download-bundle:hover { color: var(--ice); border-color: var(--ice); }
 
 /* hide stamps — war.gov design uses none */
 .stamps { display: none; }

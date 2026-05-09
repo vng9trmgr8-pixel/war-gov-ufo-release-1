@@ -296,6 +296,69 @@
     paintLightbox();
   };
 
+  /* ======================= download all ======================= */
+  let downloadInProgress = false;
+
+  const collectDownloadUrls = () => {
+    const urls = [];
+    for (const r of DATA.pdfs)   if (r.url) urls.push(r.url);
+    for (const r of DATA.images) if (r.url && !r.extracted) urls.push(r.url);
+    return urls;
+  };
+
+  const triggerDownload = (proxyUrl, filename) => {
+    const a = document.createElement("a");
+    a.href = proxyUrl;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const downloadAll = async () => {
+    if (downloadInProgress) return;
+    const urls = collectDownloadUrls();
+    const ok = window.confirm(
+      `Download all ${urls.length} files (≈2.3 GB) directly from war.gov?\n\n` +
+      `Your browser will ask permission to download multiple files — click ` +
+      `"Allow" once. Files save to your default Downloads folder.\n\n` +
+      `This may take several minutes.`
+    );
+    if (!ok) return;
+
+    downloadInProgress = true;
+    const btn = $("#download-all");
+    const label = btn.querySelector(".dl-label");
+    const prog  = btn.querySelector(".dl-progress");
+    btn.classList.add("running");
+    prog.hidden = false;
+
+    let okCount = 0, failCount = 0;
+    for (let i = 0; i < urls.length; i++) {
+      const u = urls[i];
+      const filename = u.split("/").pop().split("?")[0];
+      const proxyUrl =
+        `/api/download?url=${encodeURIComponent(u)}&name=${encodeURIComponent(filename)}`;
+      try {
+        triggerDownload(proxyUrl, filename);
+        okCount++;
+      } catch {
+        failCount++;
+      }
+      label.textContent = "DOWNLOADING";
+      prog.textContent = `${i + 1}/${urls.length}`;
+      // Throttle: ~3 downloads/sec keeps the browser happy without dragging on forever
+      await new Promise((r) => setTimeout(r, 350));
+    }
+
+    btn.classList.remove("running");
+    label.textContent = "DOWNLOAD ALL";
+    prog.textContent = `done (${okCount}${failCount ? ` · ${failCount} failed` : ""})`;
+    setTimeout(() => { prog.hidden = true; prog.textContent = ""; }, 8000);
+    downloadInProgress = false;
+  };
+
   /* ======================= boot ======================= */
   const wireEvents = () => {
     $$(".tab").forEach((t) =>
@@ -313,6 +376,8 @@
     $(".lb-close").addEventListener("click", closeLightbox);
     $(".lb-prev").addEventListener("click", () => lbStep(-1));
     $(".lb-next").addEventListener("click", () => lbStep(1));
+    const downloadBtn = $("#download-all");
+    if (downloadBtn) downloadBtn.addEventListener("click", () => downloadAll());
     $("#lb-share-copy").addEventListener("click", async () => {
       const btn = $("#lb-share-copy");
       const label = btn.querySelector(".lb-share-txt");

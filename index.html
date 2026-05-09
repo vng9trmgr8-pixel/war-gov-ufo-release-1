@@ -50,13 +50,18 @@
       <span class="sep">//</span>
       <span id="counts" class="counts">— loading manifest —</span>
       <span class="sep">//</span>
-      <a href="/ufo-release-1-bundle.zip" class="download-all" download
-         title="Bundle: manifest.txt + Python downloader + README (≈4 KB; fetches all 2.3 GB past Akamai)">
+      <button type="button" id="download-all" class="download-all"
+              title="Pull all 119 PDFs + 14 images directly from war.gov to your Downloads folder">
         <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
           <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/>
         </svg>
-        DOWNLOAD ALL
+        <span class="dl-label">DOWNLOAD ALL</span>
+        <span class="dl-progress" hidden></span>
+      </button>
+      <a href="/ufo-release-1-bundle.zip" class="download-bundle" download
+         title="Or grab a small zip with manifest.txt + Python script (4 KB)">
+        OR SCRIPT BUNDLE
       </a>
     </div>
 
