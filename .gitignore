@@ -5,3 +5,4 @@ __pycache__
 extract_text.out
 extracted-text/
 summaries/
+dist/ufo-release-1-full.zip

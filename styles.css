@@ -232,6 +232,15 @@ select option { background: var(--night); }
   border-color: var(--ice);
 }
 .source-line .download-all svg { display: block; }
+.source-line .download-all .dl-size {
+  font-size: 9.5px;
+  letter-spacing: 0;
+  background: var(--ice-glow);
+  border: 1px solid var(--ice-dim);
+  padding: 1px 6px;
+  margin-left: 4px;
+  color: var(--ice);
+}
 .source-line .download-all .dl-progress {
   font-size: 10px;
   opacity: 0.85;
