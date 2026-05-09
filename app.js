@@ -4,6 +4,8 @@
   const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
 
   let DATA = null;
+  let SEARCH_INDEX = null;          // {i, stem, t}[] — populated async
+  let SEARCH_HITS = null;            // Set<int> of pdf-indices matching current query (full-text)
   let activeTab = "pdfs";
   let activeAgency = "";
   let query = "";
@@ -28,27 +30,44 @@
       .toUpperCase();
   };
 
-  const matchQuery = (rec, q) => {
+  const matchQuery = (rec, q, listKind) => {
     if (!q) return true;
     const hay = [
       rec.title, rec.agency, rec.incidentDate, rec.incidentLocation,
       rec.blurb, rec.videoTitle,
     ].join(" ").toLowerCase();
-    return hay.includes(q);
+    if (hay.includes(q)) return true;
+    // Full-text fallback: only meaningful for PDFs (other tabs already match metadata).
+    if (listKind === "pdfs" && SEARCH_HITS && SEARCH_HITS.size) {
+      const idx = DATA.pdfs.indexOf(rec);
+      if (SEARCH_HITS.has(idx)) return true;
+    }
+    return false;
   };
 
-  const filtered = (list) =>
+  // Walk the search index and rebuild the SEARCH_HITS set whenever the query changes.
+  const rebuildSearchHits = () => {
+    if (!query || !SEARCH_INDEX) { SEARCH_HITS = null; return; }
+    const q = query.toLowerCase();
+    const hits = new Set();
+    for (const doc of SEARCH_INDEX) {
+      if (doc.t.includes(q)) hits.add(doc.i);
+    }
+    SEARCH_HITS = hits;
+  };
+
+  const filtered = (list, listKind) =>
     list.filter(
       (r) =>
         (!activeAgency || r.agency === activeAgency) &&
-        matchQuery(r, query)
+        matchQuery(r, query, listKind)
     );
 
   /* ======================= renderers ======================= */
   const renderPdfs = () => {
     const grid = $("#pdf-grid");
     const empty = $("#pdf-empty");
-    const list = filtered(DATA.pdfs);
+    const list = filtered(DATA.pdfs, "pdfs");
     grid.innerHTML = list
       .map(
         (r, i) => `
@@ -86,13 +105,19 @@
   const renderImages = () => {
     const grid = $("#img-grid");
     const empty = $("#img-empty");
-    const list = filtered(DATA.images);
+    const list = filtered(DATA.images, "images");
     grid.innerHTML = list
       .map(
-        (r, i) => `
-        <article class="img-card" data-i="${i}">
+        (r, i) => {
+          const ex = r.extractedFrom;
+          const sourceLink = ex
+            ? `<a href="${escapeHTML(ex.pdfUrl)}" target="_blank" rel="noopener">SOURCE PDF p${ex.page} →</a>`
+            : `<a href="${escapeHTML(r.url)}" target="_blank" rel="noopener">OPEN ORIGINAL →</a>`;
+          return `
+        <article class="img-card${ex ? " extracted" : ""}" data-i="${i}">
           <button class="img-thumb-wrap" type="button" aria-label="Enlarge ${escapeHTML(r.title)}">
             <img loading="lazy" src="${escapeHTML(r.thumb || r.url)}" alt="${escapeHTML(r.title)}" />
+            ${ex ? `<span class="extracted-badge">FROM PDF</span>` : ""}
           </button>
           <div class="img-body">
             <div class="pdf-meta">
@@ -103,11 +128,12 @@
             <h3 class="pdf-title">${escapeHTML(formatTitle(r.title))}</h3>
             <p class="pdf-blurb">${escapeHTML(r.blurb || "—")}</p>
             <div class="pdf-actions">
-              <a href="${escapeHTML(r.url)}" target="_blank" rel="noopener">OPEN ORIGINAL →</a>
+              ${sourceLink}
               ${r.blurb && r.blurb.length > 240 ? `<button class="more" type="button" data-toggle>READ MORE</button>` : ""}
             </div>
           </div>
-        </article>`
+        </article>`;
+        }
       )
       .join("");
     empty.classList.toggle("hidden", list.length > 0);
@@ -130,7 +156,7 @@
   const renderVideos = () => {
     const grid = $("#vid-grid");
     const empty = $("#vid-empty");
-    const list = filtered(DATA.videos);
+    const list = filtered(DATA.videos, "videos");
     grid.innerHTML = list
       .map(
         (r, i) => `
@@ -246,6 +272,9 @@
     if (r._mode === "video") {
       orig.href = r.dvidsPage;
       orig.textContent = "OPEN ON DVIDS →";
+    } else if (r.extractedFrom) {
+      orig.href = r.extractedFrom.pdfUrl;
+      orig.textContent = `OPEN SOURCE PDF (page ${r.extractedFrom.page}) →`;
     } else {
       orig.href = r.url;
       orig.textContent = "OPEN ORIGINAL ON WAR.GOV →";
@@ -274,6 +303,7 @@
     );
     $("#search").addEventListener("input", (e) => {
       query = e.target.value.trim().toLowerCase();
+      rebuildSearchHits();
       renderActive();
     });
     $("#agency-filter").addEventListener("change", (e) => {
@@ -326,6 +356,21 @@
       rebuildAgencyFilter();
       wireEvents();
       renderActive();
+      // Search index is fetched separately (≈1.3 MB) so the page renders fast.
+      const searchInput = $("#search");
+      const placeholder = searchInput.placeholder;
+      searchInput.placeholder = "search title, agency, blurb…  (full text indexing…)";
+      fetch("search-index.json")
+        .then((r) => r.json())
+        .then((idx) => {
+          SEARCH_INDEX = idx.docs;
+          searchInput.placeholder = "search title, agency, blurb, OR full PDF text…";
+          if (query) { rebuildSearchHits(); renderActive(); }
+        })
+        .catch((err) => {
+          searchInput.placeholder = placeholder;
+          console.warn("search index failed to load:", err);
+        });
     })
     .catch((err) => {
       $("#counts").textContent = "FAILED TO LOAD MANIFEST";

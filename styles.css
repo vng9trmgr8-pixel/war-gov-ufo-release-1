@@ -482,6 +482,18 @@ main {
   transition: transform 320ms ease, filter 320ms ease;
 }
 .img-card:hover .img-thumb-wrap img { transform: scale(1.04); filter: none; }
+.img-card .extracted-badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: rgba(2, 7, 13, 0.78);
+  color: var(--ice);
+  border: 1px solid var(--ice-dim);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  padding: 3px 7px;
+  pointer-events: none;
+}
 .img-body {
   padding: var(--space-4);
   display: flex;
