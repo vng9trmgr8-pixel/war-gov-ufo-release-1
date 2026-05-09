@@ -336,36 +336,10 @@ select option { background: var(--night); }
 .tab-tools select { min-width: 150px; }
 
 @media (max-width: 980px) {
-  .tabs { padding: 0; flex-wrap: nowrap; }
-  .tab {
-    padding: 14px 10px;
-    flex: 1 1 0;
-    min-width: 0;
-    justify-content: center;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    gap: 8px;
-  }
-  .tab-count {
-    font-size: 10px;
-    padding: 2px 6px;
-    min-width: 22px;
-    letter-spacing: 0;
-  }
-  .tab-tools {
-    width: 100%;
-    padding: var(--space-3);
-    border-top: 1px solid var(--rule);
-    flex-wrap: wrap;
-  }
-  .tab-tools input  { flex: 1 1 100%; min-width: 0; }
-  .tab-tools select { flex: 1 1 100%; }
-}
-@media (max-width: 520px) {
-  /* On phones, the count chips eat all the room. Drop them and let the
-     labels breathe. */
-  .tab .tab-count { display: none; }
-  .tab { padding: 14px 6px; font-size: 12px; letter-spacing: 0.16em; gap: 0; }
+  .tabs { padding: 0; }
+  .tab { padding: 14px 18px; flex: 1 1 auto; min-width: 33%; }
+  .tab-tools { width: 100%; padding: var(--space-3); border-top: 1px solid var(--rule); }
+  .tab-tools input { flex: 1; }
 }
 
 /* ============================================================
