@@ -336,10 +336,34 @@ select option { background: var(--night); }
 .tab-tools select { min-width: 150px; }
 
 @media (max-width: 980px) {
-  .tabs { padding: 0; }
-  .tab { padding: 14px 18px; flex: 1 1 auto; min-width: 33%; }
-  .tab-tools { width: 100%; padding: var(--space-3); border-top: 1px solid var(--rule); }
-  .tab-tools input { flex: 1; }
+  .tabs { padding: 0; flex-wrap: nowrap; }
+  .tab {
+    padding: 12px 8px;
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    gap: 6px;
+  }
+  .tab-count {
+    font-size: 9px;
+    padding: 2px 5px;
+    min-width: 22px;
+    letter-spacing: 0;
+  }
+  .tab-tools {
+    width: 100%;
+    padding: var(--space-3);
+    border-top: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .tab-tools input { flex: 1 1 100%; min-width: 0; }
+  .tab-tools select { flex: 1 1 100%; }
+}
+@media (max-width: 420px) {
+  .tab { padding: 10px 4px; font-size: 9px; letter-spacing: 0.08em; gap: 4px; }
+  .tab-count { font-size: 8px; padding: 1px 4px; min-width: 18px; }
 }
 
 /* ============================================================
